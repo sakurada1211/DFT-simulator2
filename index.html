@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFT Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- グラフ描画のためのChart.jsを追加 -->
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#home">ホーム</a></li>
+                <li><a href="#basic-concepts">基本概念</a></li>
+                <li><a href="#theory-calculations">理論と計算方法</a></li>
+                <li><a href="#simulation">実践シミュレーション</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="home">
+            <h1>DFTシミュレーターへようこそ</h1>
+            <div id="progress">進捗状況: 0%</div>
+        </section>
+        <section id="basic-concepts">
+            <h2>基本概念</h2>
+            <div class="content">
+                <div class="text">
+                    <h3>時間領域と周波数領域の概念説明</h3>
+                    <p>時間領域とは、信号の振幅を時間の関数として表したものです。一方、周波数領域とは、信号の振幅を周波数の関数として表したものです。</p>
+
+                    <h3>オイラーの公式の復習</h3>
+                    <p>オイラーの公式は、複素数と三角関数を結びつける重要な公式です。<br>
+                        <code>e<sup>iθ</sup> = cos(θ) + i sin(θ)</code>
+                    </p>
+
+                    <h3>正弦波とコサイン波の理論</h3>
+                    <p>正弦波とコサイン波は周期的な信号の基本形です。これらの波は、周波数、振幅、位相によって特徴づけられます。</p>
+                </div>
+                <div class="graph">
+                    <canvas id="interactiveGraph"></canvas> <!-- インタラクティブグラフのキャンバス -->
+                    <input type="range" id="frequencyRange" min="1" max="10" step="0.1" value="1"
+                        oninput="updateGraph()"> <!-- 周波数変更スライダー -->
+                    <label for="frequencyRange">周波数: <span id="frequencyValue">1</span></label>
+                </div>
+            </div>
+        </section>
+        <section id="theory-calculations">
+            <h2>理論と計算方法</h2>
+            <div class="content">
+                <div class="definition">
+                    <h3>フーリエ変換の定義と式</h3>
+                    <p>フーリエ変換は、時間領域の信号を周波数領域に変換する手法です。連続時間信号のフーリエ変換は次の式で定義されます：</p>
+                    <pre class="code-block">
+X(f) = ∫ x(t) e<sup>-i2πft</sup> dt
+                    </pre>
+                    <p>離散フーリエ変換（DFT）は、離散信号に適用されるフーリエ変換です。DFTは次の式で定義されます：</p>
+                    <pre class="code-block">
+X[k] = Σ x[n] e<sup>-i2πkn/N</sup> (n=0,1,...,N-1)
+                    </pre>
+                </div>
+                <div class="example">
+                    <h3>簡単な正弦波のDFT計算例</h3>
+                    <p>例として、簡単な正弦波 <code>x[n] = sin(2πf₀n/N)</code> のDFTを計算します。ここで、<code>f₀</code> は基本周波数、<code>N</code>
+                        はサンプル数です。</p>
+                    <pre class="code-block">
+N = 8
+f₀ = 1
+x[n] = [0, 1, 0, -1, 0, 1, 0, -1]
+
+X[k] = Σ x[n] e<sup>-i2πkn/N</sup> (n=0,1,...,N-1)
+    = [0, 1, 0, -1, 0, 1, 0, -1]
+                    </pre>
+                    <p>各ステップでの計算結果は以下のようになります：</p>
+                    <pre class="code-block">
+X[0] = 0 + 0i
+X[1] = 0 + 4i
+X[2] = 0 + 0i
+X[3] = 0 - 4i
+X[4] = 0 + 0i
+X[5] = 0 + 4i
+X[6] = 0 + 0i
+X[7] = 0 - 4i
+                    </pre>
+                </div>
+            </div>
+        </section>
+        <section id="simulation">
+            <h2>実践シミュレーション</h2>
+            <div class="content">
+                <div class="input-section">
+                    <h3>合成波の作成</h3>
+                    <label for="frequencies">周波数 (カンマ区切り): </label>
+                    <input type="text" id="frequencies" placeholder="例: 1,2,3">
+                    <label for="amplitudes">振幅 (カンマ区切り): </label>
+                    <input type="text" id="amplitudes" placeholder="例: 1,0.5,0.25">
+                    <label for="phases">位相 (カンマ区切り): </label>
+                    <input type="text" id="phases" placeholder="例: 0,0,0">
+                    <button onclick="generateCompositeWave()">合成波を生成</button>
+                </div>
+                <div class="transform-section">
+                    <h3>DFT計算過程</h3>
+                    <button onclick="calculateDFT()">DFTを計算</button>
+                    <div id="dft-steps"></div>
+                </div>
+                <div class="result-section">
+                    <h3>結果表示</h3>
+                    <p>以下のグラフは、DFTの計算結果を示しています。</p>
+                    <div>
+                        <h4>時間領域信号</h4>
+                        <p>このグラフは、入力された合成波（時間領域信号）を示しています。</p>
+                        <canvas id="timeDomainChart"></canvas>
+                    </div>
+                    <div>
+                        <h4>周波数スペクトル</h4>
+                        <p>このグラフは、信号の周波数スペクトルを示しています。各棒は特定の周波数成分の振幅を表しています。</p>
+                        <canvas id="frequencySpectrum"></canvas>
+                    </div>
+                    <div>
+                        <h4>再構成された信号</h4>
+                        <p>このグラフは、DFTから再構成された合成波（時間領域信号）を示しています。</p>
+                        <canvas id="reconstructedSignal"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+
+</html>
